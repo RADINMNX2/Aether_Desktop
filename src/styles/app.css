@@ -1,7 +1,8 @@
 /* =============================================================================
    Aether Desktop — اجزای رابط کاربری
    رنگ‌ها و فاصله‌ها از ui/theme/Color.kt و Theme.kt گرفته شده‌اند.
-   v18: طراحی مدرن شیشه‌ای (glassmorphism)، عمق نرم، و انیمیشن‌های نرم.
+   1.2.7: پورت کامل صفحهٔ اصلی به ConnectionCard (سطح شیشه‌ای واحد 26dp)،
+   GlowCycle (نور متحرک دور کارت)، متر قدرت پینگ و پالت navy هفت‌پله‌ای.
    ========================================================================== */
 
 * { box-sizing: border-box; }
@@ -9,7 +10,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: var(--navy-900);
+  background: var(--navy-950);
   color: var(--on-dark);
   font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
@@ -44,39 +45,12 @@ body.lang-fa .input--area {
 /* Latin words inside Persian text render LTR and isolated so RTL text stays tidy. */
 bdi { direction: ltr; unicode-bidi: isolate; }
 
-/* ---- پس‌زمینهٔ فراگیر (v18) ---------------------------------------
-   سه هالهٔ رنگی ظریف + شبکهٔ محو، دو لایهٔ fixed جداگانه.
-   فقط به‌صورت جمعه transform حرکت می‌کند (GPU) و زیر prefers-reduced-motion
-   کاملاً ساکن می‌ماند. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: -40px;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(1100px 760px at 88% -12%, rgba(76, 141, 255, 0.16), transparent 62%),
-    radial-gradient(920px 700px at -8% 26%, rgba(50, 224, 196, 0.11), transparent 55%),
-    radial-gradient(1000px 860px at 58% 118%, rgba(124, 92, 255, 0.09), transparent 60%);
-  filter: saturate(1.1);
-  will-change: transform;
-  animation: ambient-drift 26s ease-in-out infinite;
-}
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 44px 44px;
-}
-@keyframes ambient-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50%      { transform: translate3d(-26px, 22px, 0) scale(1.05); }
-}
+/* ---- پس‌زمینهٔ فراگیر (1.2.7) --------------------------------------
+   عمداً فلت است: AuroraBackground موبایل در 1.2.2 حذف شد (هزینهٔ فریم) و
+   دسکتاپ هم همان تصمیم را دنبال می‌کند — یک navy سادهٔ #070B14؛ عمق و
+   نورِ صفحه از خودِ کارت اتصال و ریل می‌آید، نه از انیمیشن پس‌زمینه. */
+body::before { content: none; }
+body::after { content: none; }
 
 /* ---- نوار عنوان سفارشی ------------------------------------------- */
 .titlebar {
@@ -84,9 +58,9 @@ body::after {
   display: flex;
   align-items: center;
   padding-inline-start: 4px;
-  background: rgba(11, 16, 30, 0.62);
+  background: rgba(11, 17, 29, 0.82);
   backdrop-filter: blur(22px) saturate(1.4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
 }
 .titlebar__title { font-size: 12px; letter-spacing: 0.4px; color: var(--on-dark-muted); }
@@ -135,8 +109,8 @@ body::after {
   align-items: stretch;
   gap: 6px;
   padding: 14px 8px;
-  background: rgba(15, 22, 38, 0.55);
-  border-inline-end: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--navy-900);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.05);
   overflow-y: auto;
 }
 
@@ -177,12 +151,13 @@ body::after {
 .rail__item:hover .rail__icon { background: rgba(255, 255, 255, 0.07); }
 .rail__item.is-active { color: var(--on-dark); }
 .rail__item.is-active .rail__icon {
-  background: var(--grad-active);
+  background: color-mix(in srgb, var(--accent, var(--aether-blue)) 22%, transparent);
   color: #fff;
   transform: scale(1.1);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--aether-blue)) 38%, transparent);
   box-shadow:
-    0 10px 26px -10px color-mix(in srgb, var(--accent, #4C8DFF) 70%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 10px 26px -10px color-mix(in srgb, var(--accent, var(--aether-blue)) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .rail__item.is-active .rail__label {
   color: var(--on-dark);
@@ -220,14 +195,10 @@ body::after {
 .view--home > * {
   animation: rise-in 520ms var(--motion-emphasized) backwards;
 }
-.view--home > *:nth-child(1) { animation-delay: 60ms; }
-.view--home > *:nth-child(2) { animation-delay: 120ms; }
-.view--home > *:nth-child(3) { animation-delay: 180ms; }
-.view--home > *:nth-child(4) { animation-delay: 240ms; }
-.view--home > *:nth-child(5) { animation-delay: 300ms; }
-.view--home > *:nth-child(6) { animation-delay: 360ms; }
-.view--home > *:nth-child(7) { animation-delay: 420ms; }
-.view--home > *:nth-child(8) { animation-delay: 480ms; }
+.view--home > *:nth-child(1) { animation-delay: 40ms; }
+.view--home > *:nth-child(2) { animation-delay: 100ms; }
+.view--home > *:nth-child(3) { animation-delay: 160ms; }
+.view--home > *:nth-child(4) { animation-delay: 220ms; }
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(16px); filter: blur(3px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
@@ -250,147 +221,186 @@ body::after {
   position: relative;
   width: var(--connect-button);
   height: var(--connect-button);
-  margin: 14px 0 6px;
+  margin: 12px 0 2px;
   border: 0;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.12), transparent 34%),
-    radial-gradient(circle at 68% 70%, color-mix(in srgb, var(--accent, #4C8DFF) 16%, transparent), transparent 46%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.07), transparent 42%),
-    var(--navy-800);
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.045), transparent 54%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--accent, var(--aether-blue)) 28%, transparent),
+      var(--navy-850));
   color: var(--accent, var(--aether-blue));
   cursor: pointer;
   display: grid;
   place-items: center;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent, #4C8DFF) 42%, transparent),
-    0 0 0 6px color-mix(in srgb, var(--accent, #4C8DFF) 6%, transparent),
-    0 20px 60px -18px color-mix(in srgb, var(--accent, #4C8DFF) 70%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 22px 60px -18px color-mix(in srgb, var(--accent, #5B93FF) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition:
     transform var(--dur-base) var(--motion-emphasized),
     box-shadow 600ms var(--motion-standard),
     color 600ms ease;
 }
-.connect::after {
-  content: "";
-  position: absolute;
-  inset: -18px;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent, #4C8DFF) 24%, transparent), transparent 68%);
-  opacity: 0;
-  transition: opacity var(--dur-slow) ease;
-  pointer-events: none;
-}
 .connect:hover {
   transform: translateY(-3px) scale(1.015);
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--accent, #4C8DFF) 60%, transparent),
-    0 0 0 8px color-mix(in srgb, var(--accent, #4C8DFF) 8%, transparent),
-    0 26px 74px -16px color-mix(in srgb, var(--accent, #4C8DFF) 85%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 28px 72px -18px color-mix(in srgb, var(--accent, #5B93FF) 85%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
-.connect:hover::after { opacity: 1; }
 .connect:active {
   transform: translateY(0) scale(0.965);
   transition-duration: var(--dur-fast);
 }
 
-.connect__ring {
-  position: absolute;
-  inset: 10px;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--accent, #4C8DFF) 32%, transparent);
-  transition: border-color 600ms ease;
-}
-.connect__pulse {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid var(--accent, #4C8DFF);
-  opacity: 0;
-}
-.connect.is-busy .connect__pulse { animation: pulse 1.4s ease-out infinite; }
-.connect.is-on .connect__ring { border-color: var(--accent); }
-
-@keyframes pulse {
-  0%   { transform: scale(0.92); opacity: 0.65; }
-  100% { transform: scale(1.22); opacity: 0; }
-}
-
-.status { margin: 0; font-size: 18px; font-weight: 600; transition: color 500ms ease; }
-.status__detail { margin: 0; color: var(--on-dark-muted); min-height: 20px; }
-.status__error { margin: 0; color: var(--aether-error); }
-
-.meta {
+/* ---- کارت اتصال — پورت ConnectionCard.kt (1.2.7) -------------------
+   یک سطح شیشه‌ای واحد: گرادیان دو-توقف 0xF0142039→0xF6090F1B، شعاع 26dp،
+   و همهٔ زیربخش‌ها (پیل آی‌پی، نوار سرعت، اسلایدهای متا) داخل همان کارت. */
+.conn-card {
+  position: relative;
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 4px;
-}
-.meta__cell {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  padding: 12px 10px;
+  border-radius: var(--card-radius);
+  background: linear-gradient(180deg, var(--card-surface-top), var(--card-surface-bottom));
+  border: 1px solid color-mix(in srgb, var(--accent, var(--aether-mint)) 22%, transparent);
+  box-shadow:
+    inset 0 0 52px -18px color-mix(in srgb, var(--accent, var(--aether-mint)) 22%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 26px 60px -30px rgba(0, 0, 0, 0.85);
+  padding: 17px 16px 15px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  box-shadow: var(--card-shadow);
-  transition:
-    transform var(--dur-base) var(--motion-emphasized),
-    border-color var(--dur-base) ease,
-    box-shadow var(--dur-base) ease;
+  align-items: center;
+  gap: 11px;
+  transition: border-color 600ms ease, box-shadow 600ms ease;
 }
-.meta__cell:hover {
-  transform: translateY(-3px);
-  border-color: var(--glass-raise);
-  box-shadow: var(--card-shadow-lift);
+.conn-card__glow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--card-radius);
+  pointer-events: none;
+  z-index: 0;
 }
-.meta__k { font-size: 11px; color: var(--on-dark-muted); text-transform: uppercase; letter-spacing: 0.6px; }
-.meta__v { font-size: 14px; font-variant-numeric: tabular-nums; }
+.conn-card > :not(.conn-card__glow) { position: relative; z-index: 1; }
 
-/* v8: traffic panel is now a proper card matching the meta tiles */
-.traffic {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
-  margin-top: 6px;
-  padding: 12px 18px;
-  min-width: 340px;
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: var(--card-shadow);
+.conn-status { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.conn-status__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  text-align: center;
+  transition: color 500ms ease;
 }
-.traffic__cell {
-  flex: 1;
-  display: flex;
+.conn-status__caption { margin: 0; font-size: 13px; color: var(--on-dark-muted); text-align: center; }
+
+.conn-timer { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.conn-timer__k { font-size: 11px; letter-spacing: 1.2px; color: var(--on-dark-muted); text-transform: uppercase; }
+.conn-timer__v {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: 1.2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--aether-mint);
+  transition: color 500ms ease;
+}
+.conn-timer.is-off .conn-timer__v { color: var(--on-dark-dim); }
+
+/* نشان IP + پرچم — همان پیل ServerIpPill.kt */
+.ipbadge {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
+  padding: 8px 15px;
+  border-radius: 999px;
+  background: var(--card-subsurface);
+  box-shadow:
+    inset 0 0 0 1px var(--card-subbed-hairstroke),
+    0 10px 26px -16px rgba(0, 0, 0, 0.7);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  transition: box-shadow 600ms ease;
+}
+.ipbadge.is-tunnel {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--aether-mint) 45%, transparent),
+    0 10px 30px -14px color-mix(in srgb, var(--aether-mint) 45%, transparent);
+}
+.ipbadge__label { color: var(--on-dark-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
+.ipbadge__flag { display: inline-flex; width: 22px; height: 15px; line-height: 0; }
+.ipbadge__flag .flag { width: 22px; height: 15px; border-radius: 2px; display: block; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.ipbadge__flag .flag--globe { width: 16px; height: 16px; box-shadow: none; color: var(--on-dark-muted); }
+.ipbadge__value {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-weight: 600;
+  color: var(--on-dark);
   font-variant-numeric: tabular-nums;
 }
-.traffic__badge {
-  width: 34px;
-  height: 34px;
+
+/* نوار سرعت — همان SpeedStrip.kt (دانلود = mint، آپلود = glow-cyan) */
+.speedstrip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--card-subsurface-radius);
+  background: var(--card-subsurface);
+  box-shadow: inset 0 0 0 1px var(--card-subbed-hairstroke);
+  font-variant-numeric: tabular-nums;
+}
+.speedstrip__cell { flex: 1; display: flex; align-items: center; justify-content: center; gap: 9px; }
+.speedstrip__badge {
+  width: 25px;
+  height: 25px;
   flex: none;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: transform var(--dur-slow) var(--motion-spring);
 }
-.traffic__cell:hover .traffic__badge { transform: scale(1.12) rotate(-8deg); }
-.traffic__badge--down { color: var(--aether-cyan); background: color-mix(in srgb, var(--aether-cyan) 14%, transparent); }
-.traffic__badge--up { color: var(--aether-blue); background: color-mix(in srgb, var(--aether-blue) 14%, transparent); }
-.traffic__text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
-.traffic__k { font-size: 10px; color: var(--on-dark-muted); text-transform: uppercase; letter-spacing: 0.6px; }
-.traffic__rate { font-size: 14px; font-weight: 600; }
-.traffic__total { font-size: 11px; color: var(--on-dark-muted); }
-.traffic__divider { width: 1px; background: rgba(255, 255, 255, 0.08); }
+.speedstrip__badge svg { width: 15px; height: 15px; }
+.speedstrip__badge--down { color: var(--aether-mint); background: color-mix(in srgb, var(--aether-mint) 15%, transparent); }
+.speedstrip__badge--up { color: var(--aether-glow-cyan); background: color-mix(in srgb, var(--aether-glow-cyan) 15%, transparent); }
+.speedstrip__text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; }
+.speedstrip__rate { font-family: 'Cascadia Mono', Consolas, monospace; font-weight: 700; font-size: 13px; color: var(--on-dark); }
+.speedstrip__total { font-size: 10px; color: var(--on-dark-muted); }
+.speedstrip__divider { width: 1px; height: 28px; background: rgba(255, 255, 255, 0.12); }
+.speedstrip.is-off .speedstrip__rate { color: var(--on-dark-dim); }
+.speedstrip.is-off .speedstrip__total { color: var(--on-dark-dim); }
+
+/* اسلایدهای متا — 3 ردیف تمام‌عرض داخل کارت (1.2.7: یکی نوار سه‌تایی نبود) */
+.conn-slides { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.conn-slide {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: var(--card-subsurface-radius);
+  background: var(--card-subsurface);
+  box-shadow: inset 0 0 0 1px var(--card-subbed-hairstroke);
+}
+.conn-slide__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.conn-slide__k { font-size: 11px; letter-spacing: 0.6px; color: var(--on-dark-muted); text-transform: uppercase; flex: none; }
+.conn-slide__v {
+  font-family: 'Cascadia Mono', Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-dark);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.conn-slide--endpoint .conn-slide__v { white-space: normal; overflow: visible; line-height: 1.45; }
+
+/* متر قدرت پینگ — همان PingStrength.kt (موج سینوسیِ ۲ هماهنگ) */
+.ping { margin-top: 9px; }
+.ping__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ping__k { font-size: 10px; letter-spacing: 0.4px; color: var(--on-dark-dim); text-transform: uppercase; }
+.ping__quality { font-size: 10px; font-weight: 600; }
+.ping__wave { width: 100%; height: 22px; margin-top: 6px; display: block; }
 
 /* ---- فیلدها ------------------------------------------------------- */
 .field { display: flex; flex-direction: column; gap: 8px; }
@@ -401,9 +411,9 @@ body::after {
 .seg {
   display: flex;
   position: relative;
-  background: rgba(15, 22, 38, 0.7);
+  background: var(--navy-850);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 3px;
   gap: 3px;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -413,7 +423,7 @@ body::after {
   flex: 1;
   padding: 8px 10px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 11px;
   background: transparent;
   color: var(--on-dark-muted);
   font-size: 13px;
@@ -427,16 +437,16 @@ body::after {
 .seg__item:hover { color: var(--on-dark); }
 .seg__item:active { transform: scale(0.97); }
 .seg__item.is-active {
-  background: var(--grad-primary);
-  color: #fff;
+  background: var(--navy-750); /* پلهٔ بالاتر elevation — مثل SegmentedSelector */
+  color: var(--on-dark);
   font-weight: 600;
   box-shadow:
-    0 8px 20px -8px color-mix(in srgb, var(--aether-blue) 75%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .select, .input {
-  background: rgba(15, 22, 38, 0.7);
+  background: var(--navy-850);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   color: var(--on-dark);
@@ -730,27 +740,25 @@ html[dir="rtl"] .linkrow:hover { transform: translateX(-4px); }
    v5 — پورت کامل ConnectButton.kt / StatusLine.kt / DiagnosticsPanel.kt
    ===================================================================== */
 
-/* متا حالا ۳ سلول دارد (پروتکل/اندپوینت/تأخیر) — زمان اتصال جدا شد. */
-.view--home .meta { grid-template-columns: repeat(3, 1fr); }
-
 /* ---- دکمهٔ بزرگ اتصال — چهار مود مثل موبایل ------------------- */
 .connect-wrap { position: relative; display: grid; place-items: center; margin: 6px 0 2px; }
 
-/* هالهٔ نبض‌زن — فقط در حالت متصل (۱۶۰۰ms، .92→1.06). */
+/* هالهٔ نبض‌زن — فقط در حالت متصل (۱۶۰۰ms، .92→1.06)؛ LED مثل
+   ConnectButton.kt با رنگ حالت (آبی idle / سبزنعنایی متصل) رنگ می‌گیرد. */
 .connect__halo {
   position: absolute;
   width: calc(var(--connect-button) + 44px);
   height: calc(var(--connect-button) + 44px);
   border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, #32E0C4 22%, transparent), transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent, var(--aether-blue)) 42%, transparent), transparent 70%);
   opacity: 0;
   transition: opacity 600ms ease;
   pointer-events: none;
 }
 .connect__halo.is-on { opacity: 1; animation: halo-pulse 1600ms ease-in-out infinite; will-change: transform; }
 @keyframes halo-pulse {
-  0%, 100% { transform: translateZ(0) scale(0.92); }
-  50%      { transform: translateZ(0) scale(1.06); }
+  0%, 100% { transform: translateZ(0) scale(0.93); }
+  50%      { transform: translateZ(0) scale(1.05); }
 }
 
 .connect { margin: 0; transition: transform var(--dur-base) var(--motion-emphasized), box-shadow 600ms var(--motion-standard), color 600ms ease; }
@@ -772,7 +780,7 @@ html[dir="rtl"] .linkrow:hover { transform: translateX(-4px); }
   will-change: transform;
   backface-visibility: hidden;
 }
-.connect.is-busy .connect__arc { opacity: 1; animation: arc-spin 1100ms linear infinite; }
+.connect.is-busy .connect__arc { opacity: 1; animation: arc-spin 1200ms linear infinite; }
 @keyframes arc-spin {
   from { transform: translateZ(0) rotate(0deg); }
   to   { transform: translateZ(0) rotate(360deg); }
@@ -780,36 +788,11 @@ html[dir="rtl"] .linkrow:hover { transform: translateX(-4px); }
 
 /* آیکون Autorenew در BUSY می‌چرخد (۱۴۰۰ms) — همان انیمیشن موبایل. */
 .connect__icon { display: grid; place-items: center; will-change: transform; backface-visibility: hidden; }
-.connect.is-busy .connect__icon { animation: icon-spin 1400ms linear infinite; transform: translateZ(0); }
+.connect.is-busy .connect__icon { animation: icon-spin 1200ms linear infinite; transform: translateZ(0); }
 @keyframes icon-spin {
   from { transform: translateZ(0) rotate(0deg); }
   to   { transform: translateZ(0) rotate(360deg); }
 }
-
-/* ---- نشان IP + پرچم ---------------------------------------------- */
-.ipbadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--glass-bg);
-  border: 1px solid color-mix(in srgb, var(--glass-border) 60%, transparent);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 10px 26px -16px rgba(0, 0, 0, 0.7);
-  transition: border-color 600ms ease, box-shadow 600ms ease, transform var(--dur-base) ease;
-}
-.ipbadge:hover { transform: translateY(-2px); }
-.ipbadge.is-tunnel {
-  border-color: color-mix(in srgb, #32E0C4 55%, transparent);
-  box-shadow: 0 10px 30px -14px color-mix(in srgb, #32E0C4 50%, transparent);
-}
-.ipbadge__flag { display: inline-flex; width: 22px; height: 15px; line-height: 0; }
-.ipbadge__flag .flag { width: 22px; height: 15px; border-radius: 2px; display: block; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
-.ipbadge__flag .flag--globe { width: 16px; height: 16px; box-shadow: none; color: var(--on-dark-muted); }
-.ipbadge__label { color: var(--on-dark-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
-.ipbadge__value { font-weight: 500; }
 
 /* ---- v1.2.0 — نشان محافظت WebRTC ----------------------------------- */
 .shield {
@@ -826,16 +809,12 @@ html[dir="rtl"] .linkrow:hover { transform: translateX(-4px); }
   box-shadow: 0 8px 22px -14px rgba(0, 0, 0, 0.6);
   transition: border-color 400ms ease, color 400ms ease, box-shadow 400ms ease;
 }
-.shield__dot { width: 8px; height: 8px; border-radius: 50%; background: #8A93A6; flex: none; transition: background 400ms ease, box-shadow 400ms ease; }
-.shield[data-state="safe"] { border-color: color-mix(in srgb, #32E0C4 55%, transparent); color: #32E0C4; box-shadow: 0 8px 26px -12px color-mix(in srgb, #32E0C4 55%, transparent); }
-.shield[data-state="safe"] .shield__dot { background: #32E0C4; box-shadow: 0 0 10px 1px color-mix(in srgb, #32E0C4 70%, transparent); }
-.shield[data-state="leak"] { border-color: color-mix(in srgb, #FF5C7A 60%, transparent); color: #FF5C7A; box-shadow: 0 8px 26px -12px color-mix(in srgb, #FF5C7A 55%, transparent); }
-.shield[data-state="leak"] .shield__dot { background: #FF5C7A; box-shadow: 0 0 10px 1px color-mix(in srgb, #FF5C7A 70%, transparent); }
+.shield__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--on-dark-dim); flex: none; transition: background 400ms ease, box-shadow 400ms ease; }
+.shield[data-state="safe"] { border-color: color-mix(in srgb, var(--aether-mint) 55%, transparent); color: var(--aether-mint); box-shadow: 0 8px 26px -12px color-mix(in srgb, var(--aether-mint) 50%, transparent); }
+.shield[data-state="safe"] .shield__dot { background: var(--aether-mint); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--aether-mint) 70%, transparent); }
+.shield[data-state="leak"] { border-color: color-mix(in srgb, var(--aether-error) 60%, transparent); color: var(--aether-error); box-shadow: 0 8px 26px -12px color-mix(in srgb, var(--aether-error) 55%, transparent); }
+.shield[data-state="leak"] .shield__dot { background: var(--aether-error); box-shadow: 0 0 10px 1px color-mix(in srgb, var(--aether-error) 70%, transparent); }
 .shield[data-state="unknown"] { color: var(--on-dark-muted); }
-
-/* ---- تایمر اتصال ---------------------------------------------------- */
-.uptime { margin: 0; font-size: 13px; color: var(--on-dark-muted); }
-.uptime__v { color: #32E0C4; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---- عیب‌یابی — وضعیت کلی و چک‌های زنده --------------------------- */
 .diag-overall {
@@ -892,9 +871,6 @@ html[dir="rtl"] .linkrow:hover { transform: translateX(-4px); }
 
 /* ---- v18 — کاهش حرکت برای کاربران حساس به انیمیشن ------------------ */
 @media (prefers-reduced-motion: reduce) {
-  body::before {
-    animation: none;
-  }
   .view, .view--home > *, .log__line {
     animation: none;
   }

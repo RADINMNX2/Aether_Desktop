@@ -65,6 +65,7 @@ export async function toggleConnection() {
 
 // --- رنگ حالت — دقیقاً همان قانون ConnectButton.kt --------------------
 // مقادیر از tokens.css خوانده می‌شوند تا یک مرجع رنگ واحد بماند.
+// متصل = نعنایی برند (AetherMint) — همان هویت کارت اتصال 1.2.7.
 const ACCENT_CSS = (() => {
   const read = (name) => {
     try {
@@ -73,12 +74,12 @@ const ACCENT_CSS = (() => {
       return null
     }
   }
-  return { ok: read('--aether-cyan'), err: read('--aether-error'), idle: read('--aether-blue') }
+  return { ok: read('--aether-mint'), err: read('--aether-error'), idle: read('--aether-blue') }
 })()
 export function accentFor(state) {
-  if (state === 'CONNECTED') return ACCENT_CSS.ok || '#32E0C4'
+  if (state === 'CONNECTED') return ACCENT_CSS.ok || '#3EDBB0'
   if (state === 'FAILED') return ACCENT_CSS.err || '#FF5C7A'
-  return ACCENT_CSS.idle || '#4C8DFF'
+  return ACCENT_CSS.idle || '#5B93FF'
 }
 
 // --- متن حالت — همان رشته‌های strings.xml -----------------------------

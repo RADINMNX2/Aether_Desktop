@@ -12,9 +12,27 @@ Windows desktop tunnel client with mandatory leak protection and a resilient con
 
 ---
 
-## What's new in 1.3.0
+## What's new in 1.4.0
 
-**Upgrade notice:** 1.3.0 bundles **Aether Core 1.8.0**, brings a new glass-style interface with smooth motion, and rebuilds the CI pipeline around fast, modular, deterministic jobs. Every 1.2.2 capability and protection stays enabled.
+**Upgrade notice:** 1.4.0 ports the Aether Mobile 1.2.7 home screen onto the desktop shell — a single glass connection card built on the same design tokens, plus the travelling four-colour light and the ping-strength meter from the app. Aether Core 1.8.0, the glass interface and the modular CI from 1.3.0 are all unchanged.
+
+### Short comparison with 1.2.2
+
+**New connection card.** The loose status / meta / traffic blocks were replaced by one unified glass surface (26 dp radius, the same two-stop card gradient as Compose). The Connect button is now a tinted disc that spins an arc and rotates its icon while connecting, breathes a halo while idle, and settles into a tick when connected.
+
+**GlowCycle.** While connected, the four-colour travelling light (cyan-green → mint → blue → amber) from `GlowCycle.kt` orbits the card on a canvas, following the same pointAt/perimeter motion as Android.
+
+**Ping strength meter.** A 26-bar waveform replaces the plain latency line; its colour and quality label (Excellent / Good / Fair / Poor) match mobile exactly, turning to "Measuring…" while probing and "Not connected" while offline.
+
+**Design tokens.** The CSS now consumes the exact seven-step navy palette and text dims from `Color.kt`, and the animated aurora backdrop was replaced by a flat surface for predictable performance. All new labels are translated in the Persian UI.
+
+No engine, protocol, CLI or security surface was touched; every 1.3.0 capability stays enabled.
+
+---
+
+## What was new in 1.3.0
+
+**Original upgrade notice:** 1.3.0 bundles **Aether Core 1.8.0**, brings a new glass-style interface with smooth motion, and rebuilds the CI pipeline around fast, modular, deterministic jobs. Every 1.2.2 capability and protection stays enabled.
 
 ### Short comparison with 1.2.2
 
@@ -267,10 +285,10 @@ All files are produced automatically by GitHub Actions and published to
 
 | File | Description |
 |---|---|
-| `Aether-Setup-1.3.0-x64.exe` | Windows 64-bit — graphical installer with uninstaller (recommended) |
-| `Aether-Setup-1.3.0-x86.exe` | Windows 32-bit — graphical installer with uninstaller |
-| `Aether-Portable-1.3.0-x64.zip` | Portable, no installation, 64-bit |
-| `Aether-Portable-1.3.0-x86.zip` | Portable, no installation, 32-bit |
+| `Aether-Setup-1.4.0-x64.exe` | Windows 64-bit — graphical installer with uninstaller (recommended) |
+| `Aether-Setup-1.4.0-x86.exe` | Windows 32-bit — graphical installer with uninstaller |
+| `Aether-Portable-1.4.0-x64.zip` | Portable, no installation, 64-bit |
+| `Aether-Portable-1.4.0-x86.zip` | Portable, no installation, 32-bit |
 | `SHA256SUMS.txt` | Checksums for verifying file integrity |
 
 **Requirements:** Windows 10 build 1809 (October 2018 Update) or newer.
@@ -334,7 +352,7 @@ Bundles the Wintun driver under its own licence.
 
 ### Elevation requirement
 
-Aether Desktop 1.3.0 embeds a Windows `requireAdministrator` manifest. Windows therefore
+Aether Desktop 1.4.0 embeds a Windows `requireAdministrator` manifest. Windows therefore
 shows the UAC prompt every time the app starts, before any engine, proxy, browser policy or
 firewall rule is touched. This is intentional: starting unelevated would make the WebRTC
 kill-switch incomplete. The installer is already administrator-only; this requirement now

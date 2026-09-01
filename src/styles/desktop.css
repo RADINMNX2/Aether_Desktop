@@ -59,10 +59,10 @@ html[dir="rtl"] .kv dd { text-align: end; }
      are STATE FEEDBACK, not decoration - per WCAG, essential motion may
      stay. So they are explicitly re-enabled here. */
   .connect.is-busy .connect__arc {
-    animation: arc-spin 1100ms linear infinite !important;
+    animation: arc-spin 1200ms linear infinite !important;
   }
   .connect.is-busy .connect__icon {
-    animation: icon-spin 1400ms linear infinite !important;
+    animation: icon-spin 1200ms linear infinite !important;
   }
   .connect__halo.is-on {
     animation: halo-pulse 1600ms ease-in-out infinite !important;

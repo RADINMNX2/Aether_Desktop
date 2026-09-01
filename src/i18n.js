@@ -50,6 +50,14 @@ const FA = {
   'Latency': 'تأخیر',
   'Download': 'دانلود',
   'Upload': 'آپلود',
+  'Connection': 'اتصال',
+  'Ping strength': 'قدرت پینگ',
+  'Excellent': 'عالی',
+  'Good': 'خوب',
+  'Fair': 'متوسط',
+  'Poor': 'ضعیف',
+  'Measuring': 'در حال اندازه‌گیری',
+  'Not connected': 'متصل نیست',
 
   // --- v1.2.0: محافظت در برابر نشتی WebRTC ---
   'Connection safety': 'امنیت اتصال',

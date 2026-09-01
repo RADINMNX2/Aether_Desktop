@@ -3,34 +3,52 @@
    هیچ رنگی در این پروژه نباید خارج از این فایل تعریف شود.
    ========================================================================== */
 :root {
-  /* Navy palette (Color.kt) */
-  --navy-900: #0A0E1A;
-  --navy-800: #0F1626;
-  --navy-700: #16203A;
-  --navy-600: #1E2A4A;
+  /* Navy ramp (Color.kt — 1.2.7): پله‌های واقعی روشنایی با یک هیو (222deg).
+     ترتیب صعودی: 950 تاریک‌ترین (صفحه) → 600 روشن‌ترین (خط‌چین غیرفعال). */
+  --navy-950: #070B14;
+  --navy-900: #0B111D;
+  --navy-850: #101827;
+  --navy-800: #152034;
+  --navy-750: #1B2842;
+  --navy-700: #223154;
+  --navy-600: #2B3C63;
 
-  --aether-blue:  #4C8DFF;
-  --aether-cyan:  #32E0C4;
-  --aether-error: #FF5C7A;
+  /* Accents (Color.kt) */
+  --aether-blue:      #5B93FF;
+  --aether-blue-dim:  #1B2C52;
+  --aether-mint:      #3EDBB0;
+  --aether-mint-dim:  #10322C;
+  --aether-glow-cyan: #35D0E8;
+  --aether-cyan:      #32E0C4;
+  --aether-error:     #FF5C7A;
+  --aether-error-dim: #3A1522;
+  --aether-amber:     #FFB74D;
 
-  --on-dark:       #E6ECF5;
-  --on-dark-muted: #9AA7BF;
+  --on-dark:       #E8EEF9;
+  --on-dark-muted: #93A1BC;
+  --on-dark-dim:   #64718C;
+
+  /* Connection card (Color.kt) — دو توقف شیشه‌ای کارت روی بک‌دراپ فلت. */
+  --card-surface-top:     rgba(20, 32, 57, 0.94);   /* 0xF0142039 */
+  --card-surface-bottom:  rgba(9, 15, 27, 0.96);    /* 0xF6090F1B */
+  --card-subsurface:      var(--navy-800);          /* 0x152034 */
+  --card-subbed-hairstroke: rgba(62, 219, 176, 0.12); /* 0x1F3EDBB0 */
 
   /* Material 3 role mapping (Theme.kt::AetherDarkColorScheme) */
   --md-primary:            var(--aether-blue);
   --md-on-primary:         #FFFFFF;
-  --md-secondary:          var(--aether-cyan);
+  --md-secondary:          var(--aether-mint);
   --md-on-secondary:       #04211C;
-  --md-tertiary:           var(--aether-cyan);
-  --md-background:         var(--navy-900);
+  --md-tertiary:           var(--aether-mint);
+  --md-background:         var(--navy-950);
   --md-on-background:      var(--on-dark);
-  --md-surface:            var(--navy-800);
+  --md-surface:            var(--navy-900);
   --md-on-surface:         var(--on-dark);
-  --md-surface-variant:    var(--navy-700);
+  --md-surface-variant:    var(--navy-850);
   --md-on-surface-variant: var(--on-dark-muted);
   --md-error:              var(--aether-error);
   --md-on-error:           #FFFFFF;
-  --md-outline:            var(--navy-600);
+  --md-outline:            var(--navy-700);
 
   /* Material 3 type scale (Typography() default) */
   --type-display-large:   57px/64px;
@@ -53,30 +71,30 @@
   --motion-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
   --motion-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* ۱.۲.۲: پس‌زمینه فلت است، نه گرادیان متحرک (aurora حذف شد).
+  /* 1.2.7: بک‌دراپ عمداً فلت است، نه گرادیان متحرک (aurora حذف شد).
      این در دسکتاپ هم عیناً رعایت می‌شود — هیچ انیمیشن دائمیِ پس‌زمینه. */
-  --ambient-fill: var(--navy-900);
+  --ambient-fill: var(--navy-950);
 
-  /* v18 — شیشه و عمق (Material glass) */
-  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
-  --glass-bg-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
-  --glass-border: rgba(255, 255, 255, 0.08);
+  /* سطوح شیشه‌ای عمومی (غیر از کارت اتصال) — از رمپ navy ساخته می‌شوند. */
+  --glass-bg: linear-gradient(180deg, rgba(21, 32, 52, 0.5), rgba(16, 24, 39, 0.4));
+  --glass-bg-strong: linear-gradient(180deg, rgba(34, 49, 84, 0.5), rgba(21, 32, 52, 0.4));
+  --glass-border: rgba(34, 49, 84, 0.55);
   --glass-raise: rgba(255, 255, 255, 0.16);
   --card-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
     0 24px 48px -30px rgba(0, 0, 0, 0.8),
     0 2px 10px -4px rgba(0, 0, 0, 0.5);
   --card-shadow-lift:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
     0 32px 60px -30px rgba(0, 0, 0, 0.9),
     0 6px 18px -8px rgba(0, 0, 0, 0.6);
 
-  /* v18 — گلیم آبی/فیروزه‌ای */
-  --grad-primary: linear-gradient(135deg, #6FA4FF 0%, #4C8DFF 55%, #3D7CF0 100%);
-  --grad-accent: linear-gradient(135deg, #3EE6C8 0%, #32E0C4 60%, #26C9AF 100%);
-  --grad-active: linear-gradient(135deg, rgba(76, 141, 255, 0.9), rgba(50, 224, 196, 0.35));
+  /* پرایمری — آبی برند (پرنده، بدون گرادیان سنگین مثل موبایل). */
+  --grad-primary: linear-gradient(180deg, #6FA8FF 0%, #5B93FF 45%, #4D86F5 100%);
+  --grad-accent: linear-gradient(180deg, #48E6BB 0%, #3EDBB0 55%, #33C9A0 100%);
+  --grad-active: linear-gradient(135deg, rgba(91, 147, 255, 0.92), rgba(53, 208, 232, 0.4));
 
-  /* v18 — تایمینگ حرکت */
+  /* تایمینگ حرکت */
   --dur-fast: 140ms;
   --dur-base: 260ms;
   --dur-slow: 460ms;
@@ -88,10 +106,12 @@
    دسکتاپ: همان کارت‌ها، ولی در یک rail دائمی + ستون محتوا.
    ========================================================================== */
 :root {
-  --rail-width: 84px; /* v9: slim permanent Material navigation rail */
-  --content-max: 560px;   /* عرض منطقی صفحهٔ موبایل، حفظ‌شده تا طراحی کشیده نشود */
+  --rail-width: 84px; /* slim permanent Material navigation rail */
+  --content-max: 560px;   /* عرض منطقی صفحه، حفظ‌شده تا طراحی کشیده نشود */
   --titlebar-height: 40px;
   --connect-button: 172px;
+  --card-radius: 26px;    /* 26dp کارت اتصال (ConnectionCard.kt) */
+  --card-subsurface-radius: 18px; /* 18dp زیرسطح‌های داخل کارت */
 }
 
 @media (min-width: 1280px) {
