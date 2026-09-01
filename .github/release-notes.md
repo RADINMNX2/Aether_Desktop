@@ -1,32 +1,28 @@
-# Aether Desktop 1.2.2
+# Aether Desktop 1.3.0
 
 ## What's new
 
-**Upgrade notice:** Upgrade to 1.2.2 for the bundled Aether Core 1.7.0. Domain routing rules now match the real host name behind the Wintun driver, Aether can dial out through another proxy or VPN on the same PC, and a device identity Cloudflare has stopped accepting is replaced instead of leaving you with a tunnel that handshakes but carries nothing. Every 1.2.0 and 1.2.1 protection stays enabled.
+**Release 1.3.0** bundles **Aether Core 1.8.0**, ships a new glass-style interface with smooth motion, and rebuilds the CI pipeline around fast, modular, deterministic jobs.
 
-### Short comparison with 1.2.1
+### Short comparison with 1.2.2
 
-**Added:** the complete Aether Core 1.7.0 source and build baseline; an **Upstream proxy** control (`--upstream`) for chaining Aether behind another VPN or proxy already running on the machine; host-name matching for domain routing rules, read from the TLS server name or HTTP `Host` header; automatic replacement of a refused WARP identity; and a 1.7.0 capability gate covering the new flag and the new environment variables.
+**Upgraded the engine to Aether Core 1.8.0.** The stream-head reader that recognises the real host name behind Wintun was reworked and covered with new unit tests, the server-selection logic was tightened, and the SOCKS data plane, Noise handshake helpers, MASQUE/QUIC handling and the upstream/fragment paths received another round of robustness fixes. No new command-line surface was added, so every existing capability gate and UI control keeps its exact behaviour.
 
-**Changed:** the desktop release is now 1.2.2; the root `CORE_VERSION`, the vendored `native/aether/CORE_VERSION` and the sync baseline are 1.7.0; an HTTP upstream proxy switches MASQUE to HTTP/2 automatically because HTTP CONNECT cannot carry UDP; the `--upstream` value is masked in the persistent log alongside the Zero Trust secrets; and WARP×2 (`gool`) now builds its two hops on two different Cloudflare edges.
+**New visual identity.** The entire interface was redrawn around glassmorphism — ambient animated aurora behind the app, frosted-glass cards, subtle gradients, spring-like motion and a smooth cross-fade when switching pages. The window still honours `prefers-reduced-motion` and stays responsive on modest hardware.
 
-**Preserved:** mandatory WebRTC and IPv6 fail-closed protection, the browser/network kill-switch, the three-target watchdog, exact proxy/PAC restoration, bounded shutdown, in-memory-only Zero Trust secrets, and the rule that a flag or variable is never sent to an engine that does not understand it.
+**New CI pipeline.** The build was split into four roles: a cheap `validate` job (repository sanity, JavaScript syntax gate, vendored-core consistency) that fails in seconds before any Windows runner boots; core sync is now opt-in and only runs on a manual version pin, so every main push is byte-for-byte reproducible; the two Windows builds (x64/x86) run in parallel with Rust caches that now also cover the heavy engine crate; `npm ci` runs against a committed lockfile; and clippy/cargo-audit run once on x64 instead of twice. Release publishing stays idempotent through the official `gh` CLI.
 
 ### Detailed changes
 
-**Core 1.7.0 integration:** `native/aether` contains the supplied 1.7.0 engine and its Quiche dependency. The desktop build, portable payload, About panel, rollback path, and CI core artifact all resolve the same `CORE_VERSION`, and the sync baseline for the patched probers was reseeded from 1.7.0.
+**Core 1.8.0 integration:** `native/aether` now contains the supplied 1.8.0 engine and its Quiche dependency; the sync baseline, the root `CORE_VERSION`, the vendored `native/aether/CORE_VERSION` and the About panel all report 1.8.0. The engine binary is built with the same `--locked` profile and static CRT as before.
 
-**Upstream proxy (new):** Advanced → *Upstream proxy* accepts `socks5://host:port`, `socks5://user:pass@host:port`, `http://host:port` or a bare `host:port` (read as SOCKS5). The engine then dials every outbound connection — the endpoint scan, registration calls and the ECH lookup included — through that proxy. The address is validated in the UI and again in Rust, so an unusable value is never handed to the engine: the engine would only log one line and silently continue without a proxy, which is exactly the failure a user cannot see. A SOCKS5 proxy with UDP associate carries MASQUE, WireGuard and WARP×2; an HTTP proxy is TCP-only, so MASQUE is moved to HTTP/2 for you and the panel says so.
+**Domain routing hardening (core):** the code that reads the TLS server name / HTTP `Host` from the first bytes of a connection was reworked in 1.8.0 and now has dedicated tests for a head arriving in one piece, split across writes, and for leaving trailing bytes untouched. This is exactly the code that makes domain rules work behind Wintun, so the switch continues to behave as documented in 1.2.2.
 
-**Domain routing rules now work behind Wintun:** on Windows the data plane is always the TUN driver, so the local proxy used to receive a bare IP address and every domain rule quietly missed. Core 1.7.0 reads the name from the first bytes of the connection (TLS SNI or HTTP `Host`) and decides on that, while still connecting to the address the client asked for. The new *Match domain rules by real host name* switch is on by default and only turns the behaviour off.
+**Selection robustness (core):** the endpoint-selection paths gained tighter internal handling, and the SOCKS/upstream/fragment paths received minor fixes. There is no behavioural switch for the user; existing protection, kill-switch, watchdog and cleanup behaviour is preserved.
 
-**A refused identity is replaced, not tolerated:** Cloudflare can stop accepting a saved device. The handshake keeps succeeding in that state and no traffic passes. The engine now detects the refusal and registers a fresh device; the new *Replace a refused identity* switch is on by default and lets you opt out and be told instead.
+**Visual refresh:** ambient background glow, frosted glass panels, gradient accents and spring-based motion replace the previous flat theme. Page navigation now cross-fades, and the whole animation layer is skipped automatically for users who prefer reduced motion.
 
-**WARP×2 uses two distinct edges:** nested WARP now picks two different Cloudflare endpoints for the outer and inner hop and rescans instead of tunnelling an edge through itself. Expect an occasional extra scan round on very restrictive networks, especially with a narrow manual address range.
-
-**Version gate extended:** `CoreCaps` gained 1.7.0 capabilities. On an older pinned core the new flag and variables are never sent and the matching UI sections are disabled with an explanation, exactly like the 1.5.0 features.
-
-**Logging:** `--upstream` joins `--access-secret`, `--access-token` and `--access-email` in the redaction list, so proxy credentials never reach the rotating log file.
+**Faster, modular CI:** no upstream clone or ~10MB core artifact upload on ordinary pushes; deterministic vendored core; `npm ci` on the committed lockfile with npm cache; Rust cache now keyed over both workspaces; `cargo generate-lockfile` staged before caching and audit; clippy and audit on x64 only; the engine build and Tauri build have hard timeouts so a hang can never stall the queue.
 
 ### Security audit summary
 
@@ -42,33 +38,29 @@ Full report: [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
 
 <div dir="rtl">
 
-## تازه‌های نسخهٔ ۱.۲.۲
+## تازه‌های نسخهٔ ۱.۳.۰
 
-**یادآوری ارتقا:** نسخهٔ ۱.۲.۲ با هستهٔ Aether Core 1.7.0 می‌آید: قواعد مسیریابی دامنه‌ای دیگر پشت درایور Wintun هم کار می‌کنند، اِتِر می‌تواند پشت یک VPN یا پروکسیِ دیگر روی همین ویندوز زنجیره شود، و هویتی که Cloudflare دیگر قبولش ندارد جایگزین می‌شود تا دیگر گرفتار تونلی نشوید که دست می‌دهد ولی ترافیک رد نمی‌کند. تمام محافظت‌های ۱.۲.۰ و ۱.۲.۱ سر جایش است.
+**نسخهٔ ۱.۳.۰** هستهٔ **Aether Core 1.8.0** را همراه می‌آورد، رابط کاربری را با امضای شیشه‌ای و حرکت نرم بازطراحی می‌کند و خط لولهٔ CI را به‌صورت ماژولار، سریع و تکرارپذیر از نو می‌سازد.
 
-### مقایسهٔ خلاصه با نسخهٔ ۱.۲.۱
+### مقایسهٔ خلاصه با نسخهٔ ۱.۲.۲
 
-**افزوده شد:** سورس کامل هستهٔ Aether Core 1.7.0 و baseline بیلد آن؛ کنترل **پروکسی بالادست** (`--upstream`) برای زنجیره‌کردن اِتِر پشت یک VPN یا پروکسیِ در حال اجرا؛ تطبیق قواعد دامنه با نام واقعی میزبان (TLS SNI یا هدر `Host`)؛ ثبت خودکار هویت تازه وقتی هویت قدیمی رد می‌شود؛ و گیت قابلیت 1.7.0 برای فلگ و متغیرهای جدید.
+**موتور به Aether Core 1.8.0 ارتقا یافت.** خوانندهٔ سرِ جریان که نام واقعی میزبان را پشت Wintun تشخیص می‌دهد بازنویسی و با تست‌های واحد جدید پوشش داده شد، منطق انتخاب نقطهٔ سمت سرور سفت‌تر شد، و به مسیر دادهٔ SOCKS، helpers دست‌دادن Noise، MASQUE/QUIC و مسیرهای upstream/fragment یک دور دیگر اصلاح پایداری خورد. سطح ورودی CLI تغییری نکرد؛ پس همهٔ گیت‌های نسخه و کنترل‌های رابط کاربری دقیقاً همان رفتار قبلی را دارند.
 
-**تغییر کرد:** نسخهٔ دسکتاپ به ۱.۲.۲؛ `CORE_VERSION` ریشه و `native/aether/CORE_VERSION` و baseline همگام‌سازی به 1.7.0؛ با پروکسی بالادستِ HTTP خودکار MASQUE روی HTTP/2 می‌رود (چون HTTP CONNECT توان حمل UDP ندارد)؛ مقدار `--upstream` در لاگ ماندگار ماسک می‌شود؛ و WARP×2 (`gool`) دو هاپ خود را روی دو لبهٔ متفاوت Cloudflare می‌سازد.
+**مظهر تازهٔ بصری.** کل رابط با سبک شیشه‌ای از نو کشیده شد — پس‌زمینهٔ محو متحرک، کارت‌های شیشه‌ای، گرادیان‌های ظریف، حرکت فنری و cross-fade نرم بین صفحات. پنجره هنوز `prefers-reduced-motion` را رعایت می‌کند و روی سخت‌افزار ضعیف هم روان است.
 
-**حفظ شد:** محافظت اجباری WebRTC و IPv6 (fail-closed)، کیل‌سوییچ، واچداگ سه‌هدفه، بازگردانی دقیق proxy/PAC، خروج محدود به زمان، نگه‌داری اسرار Zero Trust فقط در حافظه، و قاعدهٔ «هیچ فلگ یا متغیری به هسته‌ای که نمی‌فهمد فرستاده نمی‌شود».
+**خط لولهٔ CI تازه.** بیلد به چهار نقش تقسیم شد: job سبک `validate` (سلامت مخزن، گیت syntax جاوااسکریپت، یکدستی هستهٔ vendored) که قبل از روشن‌شدن هر runner ویندوزی در چند ثانیه خطا می‌دهد؛ همگام‌سازی هسته حالا opt-in است و فقط با پین دستی نسخه اجرا می‌شود تا هر push روی main بیت‌به‌بیت تکرارپذیر باشد؛ دو بیلد ویندوز (x64/x86) موازی با کش Rust که این بار کریت سنگین موتور را هم می‌پوشاند؛ `npm ci` با lockfile کامیت‌شده؛ و clippy/cargo-audit فقط یک‌بار روی x64. انتشار همچنان با CLI رسمی `gh` و به‌صورت idempotent انجام می‌شود.
 
 ### جزئیات تغییرها
 
-**یکپارچه‌سازی هستهٔ ۱.۷.۰:** پوشهٔ `native/aether` اکنون سورس ۱.۷.۰ و وابستگی Quiche را دارد. بیلد دسکتاپ، payload پرتابل، پنل درباره، مسیر rollback و artifact هسته در CI همگی یک `CORE_VERSION` واحد می‌خوانند و baseline پروبرهای پچ‌شده از خود ۱.۷.۰ دوباره کاشته شده است.
+**یکپارچه‌سازی هستهٔ ۱.۸.۰:** پوشهٔ `native/aether` اکنون سورس ۱.۸.۰ و وابستگی Quiche را دارد؛ baseline همگام‌سازی، `CORE_VERSION` ریشه، `native/aether/CORE_VERSION` و پنل درباره همگی ۱.۸.۰ را گزارش می‌دهند. موتور با همان پروفایل `--locked` و CRT استاتیک قبل ساخته می‌شود.
 
-**پروکسی بالادست (تازه):** پیشرفته ← *پروکسی بالادست* قالب‌های `socks5://host:port`، `socks5://user:pass@host:port`، `http://host:port` و یا فقط `host:port` (معنای SOCKS5) را می‌پذیرد. هسته همهٔ اتصال‌های خروجی‌اش — از جمله اسکن نقطهٔ اتصال، ثبت‌نام و جستجوی ECH — را از همان پروکسی می‌گیرد. مقدار ورودی هم در رابط کاربری و هم در Rust اعتبارسنجی می‌شود؛ مقدار نامعتبر هرگز به موتور نمی‌رسد، چون خود موتور فقط یک خط خطا می‌نویسد و بی‌صدا بدون پروکسی ادامه می‌دهد. پروکسی SOCKS5 با UDP associate هر سه پروتکل را حمل می‌کند؛ پروکسی HTTP فقط TCP است، پس MASQUE خودکار روی HTTP/2 می‌رود و پنل هم همین را می‌گوید.
+**سفت‌سازی مسیریابی دامنه (هسته):** کدی که TLS SNI یا هدر `Host` را از بایت‌های اول اتصال می‌خواند در ۱.۸.۰ بازنویسی شد و حالا تست‌های اختصاصی دارد برای رسیدنِ سرِ جریانِ یک‌تکه، پاره‌شده بین چند write، و دست‌نخوردن بایت‌های بعدی. این دقیقاً همان کدی است که قواعد دامنه را پشت Wintun کارگر می‌کند؛ پس کلید مقرون‌به‌صرفه همان رفتارِ مستندِ ۱.۲.۲ را دارد.
 
-**قواعد دامنه‌ای دیگر پشت Wintun کار می‌کنند:** در ویندوز مسیر داده همیشه درایور TUN است؛ پس پروکسی محلی فقط یک آی‌پی می‌دید و قواعد دامنه بی‌صدا بی‌اثر می‌شدند. هستهٔ 1.7.0 نام میزبان را از بایت‌های اول اتصال می‌خواند و تصمیم را بر همان می‌گیرد، در عین حال اتصال همان نشانی‌ درخواستی مشتری را دنبال می‌کند. کلید *تطبیق قواعد دامنه با نام واقعی میزبان* پیش‌فرض روشن است.
+**پایداری انتخاب (هسته):** مسیرهای انتخاب نقطهٔ سمت سرور سفت‌تر شد و مسیرهای SOCKS/upstream/fragment اصلاحات جزئی گرفتند. هیچ کلید رفتاری برای کاربر اضافه نشده؛ محافظت‌ها، کیل‌سوییچ، واچداگ و رفتار پاک‌سازی قبلی حفظ شده‌اند.
 
-**هویتِ ردشده جایگزین می‌شود:** Cloudflare می‌تواند دستگاه ذخیره‌شده را دیگر نپذیرد؛ در این حالت دست‌دادن موفق است ولی هیچ ترافیکی عبور نمی‌کند. موتور این رد را تشخیص می‌دهد و دستگاه تازه ثبت می‌کند؛ کلید *جایگزینی هویتِ ردشده* پیش‌فرض روشن است و می‌توانید خاموشش کنید تا فقط خبرتان کند.
+**بازطراحی بصری:** درخشش محیطی پس‌زمینه، پنل‌های شیشه‌ای مات، گرادیان‌ها و حرکت فنری جایگزین تم سادهٔ قبل شدند. جابه‌جایی بین صفحات با cross-fade انجام می‌شود و کل لایهٔ انیمیشن برای کاربرانی که حرکت کم‌حرکت ترجیح می‌دهند خودکار حذف می‌شود.
 
-**WARP×2 روی دو لبهٔ متفاوت:** وارپ تودرتو دیگر یک لبه را درون خودش تونل نمی‌کند و برای هاپ بیرونی و درونی دو نقطهٔ جدا انتخاب می‌کند. روی شبکه‌های سخت‌گیر — مخصوصاً با رنج دستی باریک — ممکن است یک دور اسکن اضافه لازم شود.
-
-**گسترش گیت نسخه:** به `CoreCaps` قابلیت‌های 1.7.0 اضافه شد. روی هستهٔ پین‌شدهٔ قدیمی‌تر، فلگ و متغیرهای جدید فرستاده نمی‌شوند و بخش‌های مربوطه در رابط کاربری با توضیح غیرفعال می‌شوند — دقیقاً مثل قابلیت‌های 1.5.0.
-
-**لاگ:** `--upstream` کنار `--access-secret`، `--access-token` و `--access-email` در فهرست ماسک قرار گرفته؛ اعتبارنامهٔ پروکسی هرگز در فایل لاگ نمی‌نشیند.
+**CI سریع‌تر و ماژولار:** در pushهای عادی دیگر کلون بالادست و آپلود ~۱۰MB هسته وجود ندارد؛ هستهٔ vendored قطعی است؛ `npm ci` روی lockfile کامیت‌شده با کش npm؛ کش Rust روی هر دو کارسپیس؛ `cargo generate-lockfile` قبل از کش و audit؛ clippy و audit فقط روی x64؛ و بیلد موتور و بیلد Tauri سقف زمانی سخت دارند تا هیچ‌وقت صف را قفل نکنند.
 
 ### خلاصهٔ ممیزی امنیتی
 
@@ -77,7 +69,7 @@ Full report: [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
 | کلیدها و اسرار | اعتبارنامهٔ هاردکدشده وجود ندارد؛ مقادیر حساس و اعتبارنامهٔ پروکسی ذخیره نمی‌شوند |
 | TLS و گواهی‌ها | اعتبارسنجی سیستم‌عامل به‌همراه پین SPKI |
 | DNS، IPv6 و WebRTC | مسیر حفاظت‌شده بررسی می‌شود؛ UDP مستقیم و مسیر ناامن IPv6 مسدود است |
-| ذخیره‌سازی و لاگ | آی‌پی‌ها ماسک و اسرار حذف می‌شوند؛ حفاطت فایل هویتی هنوز نیازمند سخت‌سازی است |
+| ذخیره‌سازی و لاگ | آی‌پی‌ها ماسک و اسرار حذف می‌شوند؛ حفاظت فایل هویتی هنوز نیازمند سخت‌سازی است |
 | مجوزها و بیلد | UAC اجباری است؛ CI سورس، تست، مانیفست، نصاب و پاک‌سازی را بررسی می‌کند |
 
 گزارش کامل: [SECURITY-AUDIT.md](SECURITY-AUDIT.md).

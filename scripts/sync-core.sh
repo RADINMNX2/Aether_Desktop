@@ -11,7 +11,7 @@
 # =============================================================================
 set -euo pipefail
 
-BASELINE="1.7.0"
+BASELINE="1.8.0"
 CORE_DIR="native/aether"
 BASELINE_DIR="$CORE_DIR/.upstream-baseline"
 PREV_DIR="native/.core-prev"
